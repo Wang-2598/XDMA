@@ -305,7 +305,7 @@ static NTSTATUS CountInterruptResources(IN WDFCMRESLIST ResourcesTranslated,
     return STATUS_SUCCESS;
 }
 
-// ====================== line/msi interrupt callback functions ===================================
+// ====================== line/msi 中断回调函数 ===================================
 
 NTSTATUS EvtInterruptEnable(IN WDFINTERRUPT Interrupt, IN WDFDEVICE device) {
     UNREFERENCED_PARAMETER(device);
@@ -330,7 +330,7 @@ NTSTATUS EvtInterruptDisable(IN WDFINTERRUPT Interrupt, IN WDFDEVICE device) {
 }
 
 BOOLEAN EvtInterruptIsr(IN WDFINTERRUPT Interrupt, IN ULONG MessageID)
-// interrupt service routine - handle line interrupts
+// 中断服务例程 - handle line interrupts
 {
     PIRQ_CONTEXT irq = GetIrqContext(Interrupt);
     UINT32 chIrq = 0;
@@ -373,7 +373,7 @@ BOOLEAN EvtInterruptIsr(IN WDFINTERRUPT Interrupt, IN ULONG MessageID)
 }
 
 VOID EvtInterruptDpc(IN WDFINTERRUPT interrupt, IN WDFOBJECT device)
-// Deferred interrupt service handler
+// 延迟中断服务处理程序
 {
     UNREFERENCED_PARAMETER(device);
     PIRQ_CONTEXT irq = GetIrqContext(interrupt);
@@ -422,7 +422,7 @@ VOID EvtInterruptDpc(IN WDFINTERRUPT interrupt, IN WDFOBJECT device)
     return;
 }
 
-// ====================== MSI-X interrupt callback functions ======================================
+// ====================== MSI-X 中断回调函数 ======================================
 
 NTSTATUS EvtChannelInterruptEnable(IN WDFINTERRUPT Interrupt, IN WDFDEVICE device) {
     UNREFERENCED_PARAMETER(device);
@@ -443,7 +443,7 @@ NTSTATUS EvtChannelInterruptDisable(IN WDFINTERRUPT Interrupt, IN WDFDEVICE devi
 }
 
 BOOLEAN EvtChannelInterruptIsr(IN WDFINTERRUPT Interrupt, IN ULONG MessageID)
-// interrupt service routine - handles msi/msi-x interrupts only
+// 中断服务例程 - 仅处理 msi/msi-x 中断
 {
     PIRQ_CONTEXT irq = GetIrqContext(Interrupt);
 
@@ -458,7 +458,7 @@ BOOLEAN EvtChannelInterruptIsr(IN WDFINTERRUPT Interrupt, IN ULONG MessageID)
 }
 
 VOID EvtChannelInterruptDpc(IN WDFINTERRUPT interrupt, IN WDFOBJECT device)
-// Deferred interrupt service handler
+// 延迟中断服务处理程序
 {
     UNREFERENCED_PARAMETER(device);
     PIRQ_CONTEXT irq = GetIrqContext(interrupt);
@@ -523,7 +523,7 @@ VOID EvtUserInterruptDpc(IN WDFINTERRUPT interrupt, IN WDFOBJECT device)
     WdfInterruptReleaseLock(interrupt);
 }
 
-// ====================== internal api implementation ==============================================
+// ====================== 内部 API 实现 ==============================================
 
 NTSTATUS SetupInterrupts(IN PXDMA_DEVICE xdma,
                          IN WDFCMRESLIST ResourcesRaw,
@@ -556,7 +556,7 @@ NTSTATUS SetupInterrupts(IN PXDMA_DEVICE xdma,
     return status;
 }
 
-// ============================== public api implementation =======================================
+// ============================== 公共 API 实现 =======================================
 
 NTSTATUS XDMA_UserIsrRegister(PXDMA_DEVICE xdma, ULONG eventId, PFN_XDMA_USER_WORK handler,
                               void* userData) {

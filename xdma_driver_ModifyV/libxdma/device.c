@@ -36,20 +36,22 @@
 
 // ====================== Function declarations ========================================================
 
-// declare following functions as pageable code
+// 将以下函数声明为可分页代码
 #ifdef ALLOC_PRAGMA
 
 #endif
 
-// WDK 10 static code analysis feature expects to target Windows 10 and thus recommends not to
-// use MmMapIoSpace and use MmMapIoSpaceEx instead. However this function is not available pre 
-// Win 10. Thus disable this warning. 
+/*
+WDK 10 静态代码分析功能预计针对 Windows 10，
+因此建议不要使用 MmMapIoSpace，而改用 MmMapIoSpaceEx。
+但是此功能在 Win 10 之前的版本中不可用。因此请禁用此警告。
+*/
 // see https://social.msdn.microsoft.com/Forums/en-US/f8a3fb63-10de-481c-b629-8b5f3d254c5e/unexpected-code-analysis-behavior?forum=wdk
 #pragma warning (disable : 30029) 
 
 // ====================== constants ========================================================
 
-// Version constants for the XMDA IP core
+// XMDA IP核的版本常量
 typedef enum XDMA_IP_VERSION_T {
     v2015_4 = 1,
     v2016_1 = 2,
@@ -63,14 +65,14 @@ typedef enum XDMA_IP_VERSION_T {
 
 // ====================== static functions ========================================================
 
-// Get the XDMA IP core version
+// 获取 XDMA IP核版本
 static XDMA_IP_VERSION GetVersion(IN OUT PXDMA_DEVICE xdma) {
     XDMA_IP_VERSION version = xdma->configRegs->identifier & 0x000000ffUL;
     TraceVerbose(DBG_INIT, "version is 0x%x", version);
     return version;
 }
 
-// Initialize the XDMA_DEVICE structure with default values
+// 使用默认值初始化 XDMA_DEVICE 结构
 static void DeviceDefaultInitialize(IN PXDMA_DEVICE xdma) {
     ASSERT(xdma != NULL);
 
@@ -106,7 +108,7 @@ static void DeviceDefaultInitialize(IN PXDMA_DEVICE xdma) {
     }
 }
 
-// Iterate through PCIe resources and map BARS into host memory
+// 遍历 PCIe 资源并将 BARS 映射到主机内存中
 static NTSTATUS MapBARs(IN PXDMA_DEVICE xdma, IN WDFCMRESLIST ResourcesTranslated) {
 
     const ULONG numResources = WdfCmResourceListGetCount(ResourcesTranslated);
@@ -148,7 +150,7 @@ static BOOLEAN IsConfigBAR(IN PXDMA_DEVICE xdma, IN UINT idx) {
     return ((interruptID == XDMA_ID) && (configID == XDMA_ID)) ? TRUE : FALSE;
 }
 
-// Identify which BAR is the config BAR
+// 确定哪个 BAR 是配置 BAR
 static UINT FindConfigBAR(IN PXDMA_DEVICE xdma) {
     for (UINT i = 0; i < xdma->numBars; ++i) {
         if (IsConfigBAR(xdma, i)) {
@@ -159,7 +161,7 @@ static UINT FindConfigBAR(IN PXDMA_DEVICE xdma) {
     return xdma->numBars; //not found - return past-the-end index
 }
 
-// Identify all BARs
+// 识别所有 BAR
 static NTSTATUS IdentifyBars(IN PXDMA_DEVICE xdma) {
 
     // find DMA config BAR (usually BAR1, see section 'Target Bridge' in [1]) 
@@ -200,24 +202,24 @@ NTSTATUS XDMA_DeviceOpen(WDFDEVICE wdfDevice,
 
     xdma->wdfDevice = wdfDevice;
 
-    // map PCIe BARs to host memory
+    // 将 PCIe BAR 映射到主机内存
     status = MapBARs(xdma, ResourcesTranslated);
     if (!NT_SUCCESS(status)) {
         TraceError(DBG_INIT, "MapBARs() failed! %!STATUS!", status);
         return status;
     }
 
-    // identify BAR configuration - user(optional), config, bypass(optional)
+    // 识别BAR配置 - user(optional), config, bypass(optional)
     status = IdentifyBars(xdma);
     if (!NT_SUCCESS(status)) {
         TraceError(DBG_INIT, "IdentifyBars() failed! %!STATUS!", status);
         return status;
     }
 
-    // get the module offsets in config BAR
+    // 获取配置栏中的模块偏移量
     GetRegisterModules(xdma);
 
-    // Confirm XDMA IP core version matches this driver
+    // 确认 XDMA IP核版本与该驱动程序匹配
     UINT version = GetVersion(xdma);
     if (version != v2017_1) {
         TraceWarning(DBG_INIT, "Version mismatch! Expected 2017.1 (0x%x) but got (0x%x)",
@@ -230,8 +232,8 @@ NTSTATUS XDMA_DeviceOpen(WDFDEVICE wdfDevice,
         return status;
     }
 
-    // WDF DMA Enabler - at least 8 bytes alignment
-    WdfDeviceSetAlignmentRequirement(xdma->wdfDevice, 8 - 1); // TODO - choose correct value
+    // WDF DMA Enabler - 至少 8 字节对齐
+    WdfDeviceSetAlignmentRequirement(xdma->wdfDevice, 8 - 1); // TODO - 选择正确的值
     WDF_DMA_ENABLER_CONFIG dmaConfig;
     WDF_DMA_ENABLER_CONFIG_INIT(&dmaConfig, WdfDmaProfileScatterGather64Duplex, XDMA_MAX_TRANSFER_SIZE);
     status = WdfDmaEnablerCreate(xdma->wdfDevice, &dmaConfig, WDF_NO_OBJECT_ATTRIBUTES, &xdma->dmaEnabler);
@@ -240,7 +242,7 @@ NTSTATUS XDMA_DeviceOpen(WDFDEVICE wdfDevice,
         return status;
     }
 
-    // Detect and initialize engines configured in HW IP 
+    // 检测和初始化 HW IP 中引擎的配置
     status = ProbeEngines(xdma);
     if (!NT_SUCCESS(status)) {
         TraceError(DBG_INIT, "ProbeEngines failed: %!STATUS!", status);
@@ -252,9 +254,9 @@ NTSTATUS XDMA_DeviceOpen(WDFDEVICE wdfDevice,
 
 void XDMA_DeviceClose(PXDMA_DEVICE xdma) {
 
-    // todo - stop every engine?
+    // todo - 停止所有引擎?
 
-    // reset irq vectors?
+    // 重置 irq vectors?
     if (xdma && xdma->interruptRegs) {
         xdma->interruptRegs->userVector[0] = 0;
         xdma->interruptRegs->userVector[1] = 0;
@@ -264,7 +266,7 @@ void XDMA_DeviceClose(PXDMA_DEVICE xdma) {
         xdma->interruptRegs->channelVector[1] = 0;
     }
 
-    // Unmap any I/O ports. Disconnecting from the interrupt will be done automatically by the framework.
+    // 取消映射任何 I/O 端口。框架将自动断开中断连接。
     for (UINT i = 0; i < xdma->numBars; i++) {
         if (xdma->bar[i] != NULL) {
             TraceInfo(DBG_INIT, "Unmapping BAR%d, VA:(%p) Length %ul",
