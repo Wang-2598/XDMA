@@ -44,7 +44,8 @@
 EVT_WDF_REQUEST_CANCEL      EvtCancelDma;
 
 // ====================== 设备文件节点 =======================================================
-
+// 静态常量结构体数组 FileNameLUT
+// 这种写法常用于查找表（lookup table），可以根据设备类型快速找到对应的文件名和通道号，便于后续的操作。
 const static struct {
     DEVNODE_TYPE devType;
     const wchar_t *wstr;
@@ -84,6 +85,7 @@ static VOID GetDevNodeType(PUNICODE_STRING fileName, PFILE_CONTEXT file, ULONG* 
 {
     for (UINT i = 0; i < sizeof(FileNameLUT) / sizeof(FileNameLUT[0]); ++i) {
         if (!wcscmp(fileName->Buffer, FileNameLUT[i].wstr)) {
+            // 进到这里说明fileName->Buffer等于FileNameLUT[i].wstr
             file->devType = FileNameLUT[i].devType;
             *index = FileNameLUT[i].channel;
             return;

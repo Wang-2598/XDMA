@@ -158,7 +158,7 @@ static UINT FindConfigBAR(IN PXDMA_DEVICE xdma) {
             return i;
         }
     }
-    return xdma->numBars; //not found - return past-the-end index
+    return xdma->numBars; //未找到-返回超过结束索引
 }
 
 // 识别所有 BAR
@@ -170,10 +170,30 @@ static NTSTATUS IdentifyBars(IN PXDMA_DEVICE xdma) {
         TraceError(DBG_INIT, "findConfigBar() failed: bar is %d", xdma->configBarIdx);
         return STATUS_DRIVER_INTERNAL_ERROR;
     }
-    // if config bar is bar0 then user bar doesnt exit
+    /*
+    逻辑:
+    这行代码检查 xdma->configBarIdx 的值。如果 configBarIdx 等于 1，表示配置 BAR 是 BAR1，
+    那么就将 userBarIdx 设置为 0，表示用户 BAR 存在且为 BAR0。
+    如果 configBarIdx 不等于 1，则将 userBarIdx 设置为 -1，表示用户 BAR 不存在。
+
+    意义:    
+    在某些硬件设计中，BAR0 通常用于用户数据传输，而 BAR1 用于配置。因此，如果配置 BAR 是 BAR1，意味着用户 BAR 是 BAR0。
+    这行代码帮助驱动程序确定用户数据传输的有效性。
+    */
     xdma->userBarIdx = xdma->configBarIdx == 1 ? 0 : -1;
 
-    // if config bar is not the last bar then bypass bar exists
+    /*
+    逻辑:
+    这行代码检查 xdma->numBars - xdma->configBarIdx 的值。如果这个值等于 2，
+    表示在配置 BAR 之后还有两个 BAR（即，旁路 BAR 存在），那么将 bypassBarIdx 设置为 xdma->numBars - 1，
+    表示旁路 BAR 是最后一个 BAR。
+    如果不满足条件，则将 bypassBarIdx 设置为 -1，表示旁路 BAR 不存在。
+
+    意义:
+    旁路 BAR 通常用于直接数据传输或特定的 DMA 操作。如果配置 BAR 之后还有两个 BAR，
+    说明有可能存在旁路功能，因此需要记录旁路 BAR 的索引。
+    这行代码的逻辑确保驱动程序能够正确识别设备的资源布局，特别是在处理复杂的 DMA 操作时。
+    */
     xdma->bypassBarIdx = xdma->numBars - xdma->configBarIdx == 2 ? xdma->numBars - 1 : -1;
 
     TraceInfo(DBG_INIT, "%!FUNC!, BAR index: user=%d, control=%d, bypass=%d",
@@ -235,6 +255,7 @@ NTSTATUS XDMA_DeviceOpen(WDFDEVICE wdfDevice,
     // WDF DMA Enabler - 至少 8 字节对齐
     WdfDeviceSetAlignmentRequirement(xdma->wdfDevice, 8 - 1); // TODO - 选择正确的值
     WDF_DMA_ENABLER_CONFIG dmaConfig;
+    // 设备支持使用 64 位寻址的基于数据包的散点/收集 DMA 操作。 设备还支持双工操作。XDMA_MAX_TRANSFER_SIZE（8MB）
     WDF_DMA_ENABLER_CONFIG_INIT(&dmaConfig, WdfDmaProfileScatterGather64Duplex, XDMA_MAX_TRANSFER_SIZE);
     status = WdfDmaEnablerCreate(xdma->wdfDevice, &dmaConfig, WDF_NO_OBJECT_ATTRIBUTES, &xdma->dmaEnabler);
     if (!NT_SUCCESS(status)) {

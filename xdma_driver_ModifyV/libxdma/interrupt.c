@@ -298,6 +298,7 @@ static NTSTATUS CountInterruptResources(IN WDFCMRESLIST ResourcesTranslated,
             return STATUS_DEVICE_CONFIGURATION_ERROR;
         }
 
+        // 表明该资源是一个中断资源
         if (resource->Type == CmResourceTypeInterrupt) {
             (*numInterruptResources)++;
         }

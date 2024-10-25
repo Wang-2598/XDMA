@@ -57,13 +57,13 @@ static UCHAR FindCapability(IN PBUS_INTERFACE_STANDARD pciBus, IN PPCI_COMMON_HE
     return capabilityOffset;
 }
 
-/// Determine how many MSI/MSI-X message IDs are assigned by the OS.
+/// 确定操作系统分配了多少MSI/MSI-X消息ID。
 static NTSTATUS GetNumMsiVectors(IN WDFDEVICE device, OUT PUSHORT numMsiVectors) {
 
     BUS_INTERFACE_STANDARD pciBus;
     PCI_COMMON_HEADER pciHeader;
 
-    // get bus interface
+    // 获取对另一个驱动程序的 GUID 标识接口的访问权限
     NTSTATUS status = WdfFdoQueryForInterface(device, &GUID_BUS_INTERFACE_STANDARD,
         (PINTERFACE)&pciBus, sizeof(BUS_INTERFACE_STANDARD), 1 /* Version */, NULL);
     if (!NT_SUCCESS(status)) {

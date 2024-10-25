@@ -33,6 +33,7 @@
 
 // ========================= declarations ================================================= 
 
+// 这些类型的变量是函数指针，指向实际的实现函数，虽然看着像结构体变量但是不是
 DRIVER_INITIALIZE DriverEntry;
 DRIVER_UNLOAD DriverUnload;
 
@@ -139,6 +140,7 @@ NTSTATUS EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit) {
     TraceVerbose(DBG_INIT, "(Driver=0x%p)", Driver);
 
     /*
+    设置驱动程序访问设备的读取和写入请求中的数据缓冲区的方法
     设置设备使用直接 I/O (Direct I/O) 模式,
     这段代码是告诉设备在 I/O 操作时优先使用直接 I/O 方式来提高效率，但根据具体情况可能会退回到缓冲 I/O。
     */
@@ -205,7 +207,7 @@ NTSTATUS EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit) {
     return status;
 }
 
-// Any device specific cleanup  - TODO device reset?
+// 任何特定于设备的清理 - TODO 设备重置？
 VOID EvtDeviceCleanup(IN WDFOBJECT device) {
     UNREFERENCED_PARAMETER(device);
     TraceInfo(DBG_INIT, "%!FUNC!");

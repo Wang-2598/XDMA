@@ -495,6 +495,7 @@ BOOLEAN XDMA_EngineProgramDma(IN WDFDMATRANSACTION Transaction, IN WDFDEVICE Dev
     return TRUE;
 }
 
+// 用于检查和初始化 FPGA 的传输引擎（Engine），其中包括 H2C 和 C2H 两种方向的引擎。
 NTSTATUS ProbeEngines(IN PXDMA_DEVICE xdma) {
     PAGED_CODE();
 
@@ -505,7 +506,9 @@ NTSTATUS ProbeEngines(IN PXDMA_DEVICE xdma) {
     for (UINT dir = H2C; dir < 2; dir++) { // 0=H2C, 1=C2H
         for (ULONG ch = 0; ch < XDMA_MAX_NUM_CHANNELS; ch++) {
 
-            if (EngineExists(xdma, dir, ch)) {
+            // 检查引擎是否存在
+            if (EngineExists(xdma, dir, ch)) 
+            {
                 XDMA_ENGINE* engine = &(xdma->engines[ch][dir]);
                 NTSTATUS status = EngineCreate(xdma, engine, dir, ch, engineIndex);
                 if (!NT_SUCCESS(status)) {
@@ -515,7 +518,10 @@ NTSTATUS ProbeEngines(IN PXDMA_DEVICE xdma) {
                 engineIndex++;
                 TraceInfo(DBG_INIT, "%s_%u engine created (AXI-%s)",
                           DirectionToString(dir), ch, engine->type == EngineType_ST ? "ST" : "MM");
-            } else {     // skip inactive engines
+            } 
+            else 
+            {     
+                // 引擎不存在
                 TraceInfo(DBG_INIT, "Skipping non-existing engine %s_%u",
                           DirectionToString(dir), ch);
             }
