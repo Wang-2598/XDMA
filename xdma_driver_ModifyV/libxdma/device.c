@@ -229,7 +229,7 @@ NTSTATUS XDMA_DeviceOpen(WDFDEVICE wdfDevice,
         return status;
     }
 
-    // 识别BAR配置 - user(optional), config, bypass(optional)
+    // 识别BAR配置 - user(可选的), config, bypass(可选的)
     status = IdentifyBars(xdma);
     if (!NT_SUCCESS(status)) {
         TraceError(DBG_INIT, "IdentifyBars() failed! %!STATUS!", status);
@@ -263,7 +263,7 @@ NTSTATUS XDMA_DeviceOpen(WDFDEVICE wdfDevice,
         return status;
     }
 
-    // 检测和初始化 HW IP 中引擎的配置
+    // 检测和初始化 硬件IP盒中引擎的配置
     status = ProbeEngines(xdma);
     if (!NT_SUCCESS(status)) {
         TraceError(DBG_INIT, "ProbeEngines failed: %!STATUS!", status);

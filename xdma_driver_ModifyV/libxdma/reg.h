@@ -134,7 +134,7 @@ typedef struct {
 
 } XDMA_ENGINE_REGS;
 
-/// IRQ Block Registers (0x2000)
+/// IRQ¿é¼Ä´æÆ÷ (0x2000)
 typedef struct {
     UINT32 identifier;
     UINT32 userIntEnable;
@@ -157,7 +157,7 @@ typedef struct {
 
 } XDMA_IRQ_REGS;
 
-/// Config Block Registers (0x3000)
+/// ÅäÖÃ¿é¼Ä´æÆ÷ (0x3000)
 typedef struct {
     UINT32 identifier;
     UINT32 busDev;

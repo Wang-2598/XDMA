@@ -41,9 +41,9 @@ typedef void(*PFN_XDMA_USER_WORK)(ULONG eventId, void* userData);
 
 /// user event interrupt context
 typedef struct XDMA_EVENT_T {
-    PFN_XDMA_USER_WORK work; // user callback 
-    void* userData; // custom user data. will be passed into work callback function
-    WDFINTERRUPT irq; //wdf interrupt handle
+    PFN_XDMA_USER_WORK work; // 用户回调
+    void* userData; // 自定义用户数据。将传递到工作回调函数中
+    WDFINTERRUPT irq; //wdf中断句柄
 } XDMA_EVENT;
 
 /// The XDMA device context
@@ -52,9 +52,9 @@ typedef struct XDMA_DEVICE_T {
     // WDF 
     WDFDEVICE wdfDevice;
 
-    // PCIe BAR access
+    // PCIe BAR 访问
     UINT numBars;
-    PVOID bar[XDMA_MAX_NUM_BARS]; // kernel virtual address of BAR
+    PVOID bar[XDMA_MAX_NUM_BARS]; // BAR的内核虚拟地址
     ULONG barLength[XDMA_MAX_NUM_BARS];
     ULONG configBarIdx;
     LONG userBarIdx;
@@ -63,11 +63,11 @@ typedef struct XDMA_DEVICE_T {
     volatile XDMA_IRQ_REGS *interruptRegs;
     volatile XDMA_SGDMA_COMMON_REGS * sgdmaRegs;
 
-    // DMA Engine management
+    // DMA Engine 管理
     XDMA_ENGINE engines[XDMA_MAX_NUM_CHANNELS][XDMA_NUM_DIRECTIONS];
     WDFDMAENABLER dmaEnabler;   // WDF DMA Enabler for the engine queues
 
-    // Interrupt Resources
+    // Interrupt 资源
     WDFINTERRUPT lineInterrupt;
     WDFINTERRUPT channelInterrupts[XDMA_MAX_CHAN_IRQ];
 

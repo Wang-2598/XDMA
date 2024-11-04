@@ -61,7 +61,7 @@ static NTSTATUS EngineCreatePollWriteBackBuffer(IN OUT XDMA_ENGINE *engine);
 // ======================== common engine functions ===============================================
 
 static NTSTATUS EngineCreateDescriptorBuffer(IN OUT XDMA_ENGINE *engine) {
-    // allocate host-side buffer for descriptors
+    // 为描述符分配主机端缓冲区
     SIZE_T bufferSize = (XDMA_MAX_TRANSFER_SIZE / PAGE_SIZE + 2) * sizeof(DMA_DESCRIPTOR);
 
     NTSTATUS status = WdfCommonBufferCreate(engine->parentDevice->dmaEnabler, bufferSize,
@@ -75,7 +75,7 @@ static NTSTATUS EngineCreateDescriptorBuffer(IN OUT XDMA_ENGINE *engine) {
     PUCHAR descBufferVA = (PUCHAR)WdfCommonBufferGetAlignedVirtualAddress(engine->descBuffer);
     RtlZeroMemory(descBufferVA, bufferSize);
 
-    // give hw the physical start address of the descriptor buffer
+    // 将描述符缓冲区的物理起始地址提供给硬件。
     engine->sgdma->firstDescLo = descBufferLA.LowPart;
     engine->sgdma->firstDescHi = descBufferLA.HighPart;
     engine->sgdma->firstDescAdj = 0; // depends on transfer - set later in ProgramDMA
@@ -319,7 +319,7 @@ static NTSTATUS EngineCreate(PXDMA_DEVICE xdma, XDMA_ENGINE* engine, DirToDev di
     // capture alignment requirements
     EngineGetAlignments(engine);
 
-    // create and bind dma desciptor buffer to hw
+    // 创建dma描述符缓冲区并将其绑定到硬件
     status = EngineCreateDescriptorBuffer(engine);
     if (!NT_SUCCESS(status)) {
         TraceError(DBG_INIT, "EngineCreateDescriptorBuffer() failed: %!STATUS!",

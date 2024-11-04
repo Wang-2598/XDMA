@@ -26,8 +26,7 @@
 #include "trace.h"
 
 #ifdef DBG
-// The trace message header (.tmh) file must be included in a source file before any WPP macro 
-// calls and after defining a WPP_CONTROL_GUIDS macro (defined in trace.h). see trace.h
+// "#include xx.tmh"语句必须出现在WPP_CONTROL_GUIDS宏定义之后、在对 wpp 宏的任何调用之前。
 #include "driver.tmh"
 #endif
 
@@ -93,7 +92,7 @@ static NTSTATUS GetPollModeParameter(IN PULONG pollMode) {
     return status;
 }
 
-// main entry point - Called when driver is installed
+// main entry point - 安装驱动程序时调用
 NTSTATUS DriverEntry(IN PDRIVER_OBJECT driverObject, IN PUNICODE_STRING registryPath) {
     NTSTATUS			status = STATUS_SUCCESS;
     WDF_DRIVER_CONFIG	DriverConfig;
@@ -116,6 +115,7 @@ NTSTATUS DriverEntry(IN PDRIVER_OBJECT driverObject, IN PUNICODE_STRING registry
         return status;
     }
 
+    // 通常在成功创建驱动程序对象后设置卸载函数。这确保了在驱动程序正常运行时，有一个有效的卸载处理函数
     driverObject->DriverUnload = DriverUnload;
 
     return status;
@@ -146,7 +146,7 @@ NTSTATUS EvtDeviceAdd(IN WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit) {
     */
     WdfDeviceInitSetIoType(DeviceInit, WdfDeviceIoDirect);
 
-    // 为我们感兴趣的任何函数设置回调。如果没有设置回调，框架将自行采取默认操作。
+    // 为我们需要的任何函数设置回调。如果没有设置回调，框架将自行采取默认操作。
     WDF_PNPPOWER_EVENT_CALLBACKS PnpPowerCallbacks;
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&PnpPowerCallbacks);
     PnpPowerCallbacks.EvtDevicePrepareHardware = EvtDevicePrepareHardware;
@@ -214,7 +214,7 @@ VOID EvtDeviceCleanup(IN WDFOBJECT device) {
 }
 
 // 初始化设备硬件和主机缓冲区。
-// 由即插即用管理器调用
+// 由即插即用管理器调用，在设备准备好使用硬件资源之前调用的回调函数。通常在设备初始化时使用，以配置硬件。
 NTSTATUS EvtDevicePrepareHardware(IN WDFDEVICE device, IN WDFCMRESLIST Resources,
                                   IN WDFCMRESLIST ResourcesTranslated) {
     PAGED_CODE();

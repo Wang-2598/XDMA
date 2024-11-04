@@ -97,7 +97,7 @@ typedef struct XDMA_ENGINE_T {
     EngineType type;            // MemoryMapped or Streaming
     AddressMode addressMode;    // incremental (contiguous) or non-incremental (fixed)
 
-    // dma transfer related
+    // dma传输相关
     WDFCOMMONBUFFER descBuffer;
     WDFDMATRANSACTION dmaTransaction;
     PFN_XDMA_ENGINE_WORK work; // engine work for interrupt processing
@@ -105,10 +105,10 @@ typedef struct XDMA_ENGINE_T {
     // specific to streaming interface
     XDMA_RING ring;
 
-    // specific to poll mode
+    // 特定于轮询模式
     ULONG poll;
-    WDFCOMMONBUFFER pollWbBuffer; // buffer for holding poll mode descriptor writeback data
-    ULONG numDescriptors; // keep count of descriptors in transfer for poll mode
+    WDFCOMMONBUFFER pollWbBuffer; // 用于保存轮询模式描述符回写数据的缓冲区
+    ULONG numDescriptors; // 统计轮询模式下传输的描述符数量
 } XDMA_ENGINE;
 
 #pragma pack(1)
